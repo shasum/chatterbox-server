@@ -28,13 +28,25 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
 
-  console.log("Serving request type " + request.method + " for url " + request.url);
+  //console.log("Serving request type " + request.method + " for url " + request.url);
 
   // The outgoing status.
   var statusCode = 200;
 
+  var validUrl = {};
+  validUrl['/classes/messages'] = true;
+  validUrl['/classes/room'] = true;
+  validUrl['/classes/room1'] = true;
+  validUrl['/log'] = true;
 
-  if (request.method === 'POST') {
+
+  if (request.method === 'GET') {
+    if (validUrl[request.url]) {
+      statusCode = 200;
+    } else {
+      statusCode = 404;
+    }
+  } else if (request.method === 'POST') {
     var rawData = '';
     statusCode = 201;
 
@@ -46,7 +58,10 @@ var requestHandler = function(request, response) {
       ourResponse.results.push(JSON.parse(rawData));
     });
 
+  } else {
+    statusCode = 200;
   }
+
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -69,6 +84,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
+
   response.end(JSON.stringify(ourResponse));
 
 };
