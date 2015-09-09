@@ -1,6 +1,6 @@
 /* Import node's http module: */
-var req = require("./request-handler.js");
 var http = require("http");
+var handler = require("./request-handler.js");
 
 
 // Every server needs to listen on a port with a unique number. The
@@ -16,6 +16,9 @@ var port = 3000;
 var ip = "127.0.0.1";
 
 
+var routes = {
+  '/classes/chatterbox': handler
+};
 
 // We use node's http module to create a server.
 //
@@ -23,7 +26,17 @@ var ip = "127.0.0.1";
 // incoming requests.
 //
 // After creating the server, we will tell it to listen on the given port and IP. */
-var server = http.createServer(req);
+var server = http.createServer(function(request, response){
+  console.log("Serving request type " + request.method + " for url " + request.url);
+  var route = routes[request.url];
+  if (route){
+    route(request, response);
+  } else {
+    response.writeHead(404, headers);
+    response.end(JSON.stringify('Not Found'));
+  }
+});
+
 console.log("Listening on http://" + ip + ":" + port);
 server.listen(port, ip);
 
@@ -40,3 +53,10 @@ server.listen(port, ip);
 // possibility of serving more requests. To stop your server, hit
 // Ctrl-C on the command line.
 
+var headers = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "access-control-allow-headers": "content-type, accept",
+  "access-control-max-age": 10, // Seconds.
+  'Content-Type': "application/json"
+};
